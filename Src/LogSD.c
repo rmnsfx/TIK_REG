@@ -57,8 +57,8 @@ struct devices
 	char regsI[51];
 	char floatsH[300];
 	char floatsI[300];
-	unsigned short int Holding[100];
-	unsigned short int Input[100];
+	int16_t Holding[100];
+	int16_t Input[100];
 	unsigned short int PatternH[20][2];
 	unsigned short int PatternI[20][2];
 	unsigned int Packets,BadPackets;
@@ -1148,9 +1148,9 @@ while(!LOADING)
 													hi = StructQwAdr[d]->Holding[k];
 													j++;
 													k++;
-													hi |= StructQwAdr[d]->Holding[k]<<16;
+													hi += StructQwAdr[d]->Holding[k]<<16;
 													holdf = *(float*)&hi;
-													sprintf(buf,";\"%f\"",holdf);
+													sprintf(buf,";%f",holdf);
 													*strchr(buf,'.') = ',';
 													strcat(strbuf,buf);
 													p++;
@@ -1162,9 +1162,9 @@ while(!LOADING)
 													hi = StructQwAdr[d]->Holding[k]<<16;
 													j++;
 													k++;
-													hi |= StructQwAdr[d]->Holding[k];
+													hi += StructQwAdr[d]->Holding[k];
 													holdf = *(float*)&hi;
-													sprintf(buf,";\"%f\"",holdf);
+													sprintf(buf,";%f",holdf);
 													*strchr(buf,'.') = ',';
 													strcat(strbuf,buf);
 													p++;
@@ -1197,9 +1197,9 @@ while(!LOADING)
 													hi = StructQwAdr[d]->Input[k];
 													j++;
 													k++;
-													hi |= StructQwAdr[d]->Input[k]<<16;
+													hi += StructQwAdr[d]->Input[k]<<16;
 													holdf = *(float*)&hi;
-													sprintf(buf,";\"%f\"",holdf);
+													sprintf(buf,";%f",holdf);
 													*strchr(buf,'.') = ',';
 													strcat(strbuf,buf);																							
 													p++;
@@ -1211,9 +1211,9 @@ while(!LOADING)
 													hi = StructQwAdr[d]->Input[k]<<16;
 													j++;
 													k++;
-													hi |= StructQwAdr[d]->Input[k];
+													hi += StructQwAdr[d]->Input[k];
 													holdf = *(float*)&hi;
-													sprintf(buf,";\"%f\"",holdf);
+													sprintf(buf,";%f",holdf);
 													*strchr(buf,'.') = ',';
 													strcat(strbuf,buf);																							
 													p++;

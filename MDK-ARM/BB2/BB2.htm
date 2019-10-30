@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\BB2\BB2.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\BB2\BB2.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Thu Oct 24 10:30:14 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5050106: Last Updated: Wed Oct 30 14:04:29 2019
 <BR><P>
 <H3>Maximum Stack Usage =       3776 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1168,7 +1168,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f407xx.o(RESET)
 </UL>
-<P><STRONG><a name="[64]"></a>EventTask</STRONG> (Thumb, 3398 bytes, Stack size 880 bytes, event.o(i.EventTask))
+<P><STRONG><a name="[64]"></a>EventTask</STRONG> (Thumb, 3406 bytes, Stack size 880 bytes, event.o(i.EventTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 1392<LI>Call Chain = EventTask &rArr; CreateMSlaveTask &rArr; MSlaveTask &rArr; CreateLOG &rArr; ParsingAddr &rArr; atoi &rArr; strtol &rArr; _strtoul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
@@ -2223,7 +2223,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> logsd.o(i.CreateMSlaveTask)
 </UL>
-<P><STRONG><a name="[62]"></a>MBusTCPMasterTask</STRONG> (Thumb, 1022 bytes, Stack size 2904 bytes, logsd.o(i.MBusTCPMasterTask))
+<P><STRONG><a name="[62]"></a>MBusTCPMasterTask</STRONG> (Thumb, 1026 bytes, Stack size 2904 bytes, logsd.o(i.MBusTCPMasterTask))
 <BR><BR>[Stack]<UL><LI>Max Depth = 3368<LI>Call Chain = MBusTCPMasterTask &rArr; CreateLOG &rArr; ParsingAddr &rArr; atoi &rArr; strtol &rArr; _strtoul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
@@ -2472,7 +2472,7 @@ Global Symbols
 <LI><a href="#[173]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_RTC_Init
 </UL>
 
-<P><STRONG><a name="[1d3]"></a>RTU_M</STRONG> (Thumb, 378 bytes, Stack size 32 bytes, modbus_master.o(i.RTU_M))
+<P><STRONG><a name="[1d3]"></a>RTU_M</STRONG> (Thumb, 386 bytes, Stack size 32 bytes, modbus_master.o(i.RTU_M))
 <BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = RTU_M &rArr; osSemaphoreRelease &rArr; xQueueGenericSend &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[e4]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;osSemaphoreRelease
@@ -8236,7 +8236,7 @@ Local Symbols
 <LI><a href="#[65]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;FTP_Command_thread
 </UL>
 
-<P><STRONG><a name="[61]"></a>WriteLOG</STRONG> (Thumb, 2730 bytes, Stack size 176 bytes, logsd.o(i.WriteLOG))
+<P><STRONG><a name="[61]"></a>WriteLOG</STRONG> (Thumb, 2726 bytes, Stack size 176 bytes, logsd.o(i.WriteLOG))
 <BR><BR>[Stack]<UL><LI>Max Depth = 528<LI>Call Chain = WriteLOG &rArr; f_open &rArr; find_volume &rArr; lock_fs &rArr; ff_req_grant &rArr; osSemaphoreWait &rArr; xQueueGenericReceive &rArr; vTaskPlaceOnEventList &rArr; prvAddCurrentTaskToDelayedList &rArr; vListInsert
 </UL>
 <BR>[Calls]<UL><LI><a href="#[f0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
