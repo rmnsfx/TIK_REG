@@ -146,13 +146,13 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_USART3_UART_Init(921600);
 	MX_RTC_Init();
-	MX_IWDG_Init();
+	//MX_IWDG_Init();
 	MX_TIM5_Init();
-//	MX_TIM2_Init();
-		//HAL_IWDG_Refresh(&hiwdg); // эту надо использовать периодически для сброса
-		//MX_TIM7_Init();
+	//MX_TIM2_Init();
+	//HAL_IWDG_Refresh(&hiwdg); // эту надо использовать периодически для сброса
+	//MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-//HAL_TIM_Base_Start_IT(&htim3);
+	//HAL_TIM_Base_Start_IT(&htim3);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */

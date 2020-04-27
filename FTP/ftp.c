@@ -898,89 +898,98 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 		
 		case FTP_CMD_APPE:
     case FTP_CMD_STOR:
+			
 		osSemaphoreWait(SemFiles, portMAX_DELAY);
 		
-		if(!FTPmode)
+		if( !FTPmode )
 		{
-      if((ipad.addr == 0) || (ss == 0)) FTP_SendReply(conn,FTP_REPLY_503);
-      if(arg == NULL) FTP_SendReply(conn, FTP_REPLY_501);
-      file = pvPortMalloc(sizeof(FIL));
+				if((ipad.addr == 0) || (ss == 0)) FTP_SendReply(conn,FTP_REPLY_503);
+				if(arg == NULL) FTP_SendReply(conn, FTP_REPLY_501);
+				file = pvPortMalloc(sizeof(FIL));
       
-		if ( file )
-      {
-					taskENTER_CRITICAL();
-        file_err = f_open(file, arg, FA_CREATE_NEW | FA_WRITE);
-					taskEXIT_CRITICAL();
-        if ( file_err == FR_OK )
-        {
-          data_conn = netconn_new(NETCONN_TCP);
-          netconn_set_recvtimeout(data_conn,1000*60*2); //2 min timeout
-          //timeout == keep_idle + (keep_intvl * keep_cnt)
-          data_conn->pcb.tcp->keep_idle  =  5000;
-          data_conn->pcb.tcp->keep_intvl =  1000;
-          data_conn->pcb.tcp->keep_cnt   =  5;
-          data_conn->pcb.tcp->so_options |= SOF_KEEPALIVE;
-          err = netconn_connect(data_conn, &ipad,ss);
-          			
-					if ( err == ERR_OK )
-          {
-            FTP_SendReply(conn,FTP_REPLY_150);
-            while((err = netconn_recv_tcp_pbuf(data_conn,&p))==ERR_OK)
-            {
-              for( q=p;q!=NULL;q = q->next )
-              {
-									taskENTER_CRITICAL();
-                file_err = f_write(file, q->payload, q->len, &fsize);
-									taskEXIT_CRITICAL();
-								if( file_err || q->len < fsize ) break;
-              }
-              netconn_recved(data_conn, p->tot_len);
-              pbuf_free(p);
-              if( file_err != FR_OK) break;
-            }
-            
-            if ( file_err != FR_OK )
-            {
-              FTP_SendReply(conn,FTP_REPLY_451);
+				if ( file )
+				{
+						taskENTER_CRITICAL();
+						file_err = f_open(file, arg, FA_CREATE_NEW | FA_WRITE);
+						taskEXIT_CRITICAL();
+						
+						if ( file_err == FR_OK )
+						{
+								data_conn = netconn_new(NETCONN_TCP);
+								netconn_set_recvtimeout(data_conn,1000*60*2); //2 min timeout
+								//timeout == keep_idle + (keep_intvl * keep_cnt)
+								data_conn->pcb.tcp->keep_idle  =  5000;
+								data_conn->pcb.tcp->keep_intvl =  1000;
+								data_conn->pcb.tcp->keep_cnt   =  5;
+								data_conn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+								err = netconn_connect(data_conn, &ipad,ss);
+											
+								if ( err == ERR_OK )
+								{
+										FTP_SendReply(conn,FTP_REPLY_150);
+									
+										while((err = netconn_recv_tcp_pbuf(data_conn,&p))==ERR_OK)
+										{
+												for( q=p;q!=NULL;q = q->next )
+												{
+														taskENTER_CRITICAL();
+														file_err = f_write(file, q->payload, q->len, &fsize);
+														taskEXIT_CRITICAL();
+														if( file_err || q->len < fsize ) break;
+												}
+												netconn_recved(data_conn, p->tot_len);
+												pbuf_free(p);
+												
+												if( file_err != FR_OK)
+												{
+													break;
+												}												
+										}
+									
+										if ( file_err != FR_OK )
+										{
+											FTP_SendReply(conn,FTP_REPLY_451);
+										}
+										else
+										{
+											FTP_SendReply(conn,FTP_REPLY_226);
+										}
+										f_sync(file);
+								}
+								else
+								{
+									FTP_SendReply(conn,FTP_REPLY_425);
+								}
+								f_close(file);
+								vPortFree(file);
+								
+								netconn_delete(data_conn); 
+								osSemaphoreRelease(SemFiles);
+								
+						} //if ( file_err == FR_OK )
+						else
+						{
+								vPortFree(file);
+								FTP_SendReply(conn, FTP_REPLY_550);
+								osSemaphoreRelease(SemFiles);
 						}
-            else
-            {
-              FTP_SendReply(conn,FTP_REPLY_226);
-            }
-            f_sync(file);
-          }
-          else
-          {
-            FTP_SendReply(conn,FTP_REPLY_425);
-          }
-          f_close(file);
-          vPortFree(file);
-          netconn_delete(data_conn); 
+				} //if ( file )
+				else
+				{
+					FTP_SendReply(conn,FTP_REPLY_552);
 					osSemaphoreRelease(SemFiles);
-        }
-        else
-        {
-          vPortFree(file);
-          FTP_SendReply(conn, FTP_REPLY_550);
-					osSemaphoreRelease(SemFiles);
-        }
-      }
-      else
-      {
-        FTP_SendReply(conn,FTP_REPLY_552);
-				osSemaphoreRelease(SemFiles);
-      }
-		}
+				}
+		} //( !FTPmode )
 		else
 		{
 			
-			while(1) 
-						{
+				while(1) 
+				{
 						err_t accept_err;
 						accept_err = netconn_accept(data_conn_pasv, &newconn);
-							if(accept_err == ERR_OK)
-							{
-								
+						
+						if(accept_err == ERR_OK)
+						{								
 								netconn_set_recvtimeout(newconn,1000*2); // Кароч, если за 10 сек нет данных, то отъезжаем
 								newconn->pcb.tcp->keep_idle  =  5000;
 								newconn->pcb.tcp->keep_intvl =  1000;
@@ -989,69 +998,71 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 
 								FTPmode = 1;
 								break;
-							}
 						}
+				}
 			
-			
-			if(arg == NULL) FTP_SendReply(conn, FTP_REPLY_501);
-      file = pvPortMalloc(sizeof(FIL));
+				
+				if(arg == NULL) FTP_SendReply(conn, FTP_REPLY_501);
+				file = pvPortMalloc(sizeof(FIL));
       
-		if ( file )
-      {
-					taskENTER_CRITICAL();
-        file_err = f_open(file, arg, FA_CREATE_NEW | FA_WRITE);
-					taskEXIT_CRITICAL();
-        if ( file_err == FR_OK )
-        {
-
-            FTP_SendReply(conn,FTP_REPLY_150);
-            while((err = netconn_recv_tcp_pbuf(newconn,&p))==ERR_OK)
-            {
-              for( q=p;q!=NULL;q = q->next )
-              {
-									taskENTER_CRITICAL();
-                file_err = f_write(file, q->payload, q->len, &fsize);
-									taskEXIT_CRITICAL();
-								if( file_err || q->len < fsize ) break;
-              }
-              netconn_recved(newconn, p->tot_len);
-              pbuf_free(p);
-              if( file_err != FR_OK) break;
-            }
-            
-            if ( file_err != FR_OK )
-            {
-              FTP_SendReply(conn,FTP_REPLY_451);
+				if ( file )
+				{
+						taskENTER_CRITICAL();
+						file_err = f_open(file, arg, FA_CREATE_NEW | FA_WRITE);
+						taskEXIT_CRITICAL();
+							
+						if ( file_err == FR_OK )
+						{
+								FTP_SendReply(conn,FTP_REPLY_150);
+								while((err = netconn_recv_tcp_pbuf(newconn,&p))==ERR_OK)
+								{
+										for( q=p;q!=NULL;q = q->next )
+										{
+												taskENTER_CRITICAL();
+												file_err = f_write(file, q->payload, q->len, &fsize);
+												taskEXIT_CRITICAL();
+												if( file_err || q->len < fsize ) break;
+										}
+										netconn_recved(newconn, p->tot_len);
+										pbuf_free(p);
+										if( file_err != FR_OK) break;
+								}
+								
+								if ( file_err != FR_OK )
+								{
+										FTP_SendReply(conn,FTP_REPLY_451);
+								}
+								else
+								{
+										FTP_SendReply(conn,FTP_REPLY_226);
+								}
+								f_sync(file);
+								f_close(file);
+								vPortFree(file);
+								netconn_delete(newconn); 
+								osSemaphoreRelease(SemFiles);
+						} //if ( file_err == FR_OK )
+						else
+						{
+								vPortFree(file);
+								FTP_SendReply(conn, FTP_REPLY_550);
+								osSemaphoreRelease(SemFiles);
 						}
-            else
-            {
-              FTP_SendReply(conn,FTP_REPLY_226);
-            }
-            f_sync(file);
-          f_close(file);
-          vPortFree(file);
-          netconn_delete(newconn); 
-					osSemaphoreRelease(SemFiles);
-        }
-        else
-        {
-          vPortFree(file);
-          FTP_SendReply(conn, FTP_REPLY_550);
-					osSemaphoreRelease(SemFiles);
-        }
-      }
-      else
-      {
-        FTP_SendReply(conn,FTP_REPLY_552);
-				osSemaphoreRelease(SemFiles);
-      }
-		}
-      break;
+				} //if ( file )
+				else
+				{
+						FTP_SendReply(conn,FTP_REPLY_552);
+						osSemaphoreRelease(SemFiles);
+				}
+		}		
+    break;
 			
-			 case FTP_CMD_SIZE:
-				 f_stat(arg, &fstat);
-				 FTP_SendReply(conn, "213 %d\r\n",fstat.fsize);
-			 break;
+		case FTP_CMD_SIZE:
+				
+				f_stat(arg, &fstat);
+				FTP_SendReply(conn, "213 %d\r\n",fstat.fsize);
+				break;
+		
     default: FTP_SendReply(conn, FTP_REPLY_502);
   };
 }
