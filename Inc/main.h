@@ -57,7 +57,7 @@
 
 #define SENDREPORT 0
 
-#define VERSION 114
+#define VERSION 115
 
 #define GSMMODE 1
 

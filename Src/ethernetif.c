@@ -342,7 +342,7 @@ static void low_level_init(struct netif *netif)
   /* Enable Interrupt on change of link status */
   HAL_ETH_WritePHYRegister(&EthHandle, PHY_MISR, regvalue);
 	
-		HAL_ETH_ReadPHYRegister(&EthHandle, PHY_BCR, &regvalue);
+	HAL_ETH_ReadPHYRegister(&EthHandle, PHY_BCR, &regvalue);
 	
 	HAL_ETH_ReadPHYRegister(&EthHandle, PHY_BSR, &regvalue); 
 

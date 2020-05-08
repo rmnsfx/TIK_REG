@@ -567,6 +567,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 				data_conn->pcb.tcp->keep_intvl =  1000;
 				data_conn->pcb.tcp->keep_cnt   =  5;
 				data_conn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+				tcp_nagle_disabled(data_conn);
 			
 
 				err = netconn_connect(data_conn, &ipad,ss);
@@ -606,6 +607,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 								newconn->pcb.tcp->keep_intvl =  1000;
 								newconn->pcb.tcp->keep_cnt   =  5;
 								newconn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+								tcp_nagle_disabled(newconn);
 
 								
 								break;
@@ -821,6 +823,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 								newconn->pcb.tcp->keep_intvl =  1000;
 								newconn->pcb.tcp->keep_cnt   =  5;
 								newconn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+								tcp_nagle_disabled(newconn);
 
 								FTPmode = 1;
 								break;
@@ -901,7 +904,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 			
 		osSemaphoreWait(SemFiles, portMAX_DELAY);
 		
-		if( !FTPmode )
+		if( !FTPmode ) //0 - active; 1 - passive
 		{
 				if((ipad.addr == 0) || (ss == 0)) FTP_SendReply(conn,FTP_REPLY_503);
 				if(arg == NULL) FTP_SendReply(conn, FTP_REPLY_501);
@@ -922,6 +925,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 								data_conn->pcb.tcp->keep_intvl =  1000;
 								data_conn->pcb.tcp->keep_cnt   =  5;
 								data_conn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+								tcp_nagle_disabled(newconn);
 								err = netconn_connect(data_conn, &ipad,ss);
 											
 								if ( err == ERR_OK )
@@ -987,7 +991,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 				{
 						err_t accept_err;
 						accept_err = netconn_accept(data_conn_pasv, &newconn);
-						
+					
 						if(accept_err == ERR_OK)
 						{								
 								netconn_set_recvtimeout(newconn,1000*2); // Кароч, если за 10 сек нет данных, то отъезжаем
@@ -995,6 +999,9 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 								newconn->pcb.tcp->keep_intvl =  1000;
 								newconn->pcb.tcp->keep_cnt   =  5;
 								newconn->pcb.tcp->so_options |= SOF_KEEPALIVE;
+								tcp_nagle_disabled(newconn);
+								
+							
 
 								FTPmode = 1;
 								break;
@@ -1022,6 +1029,7 @@ void FTP_Execute(struct netconn *conn, const char* cmd, char* arg, ftp_pcb_t* pc
 												file_err = f_write(file, q->payload, q->len, &fsize);
 												taskEXIT_CRITICAL();
 												if( file_err || q->len < fsize ) break;
+																							
 										}
 										netconn_recved(newconn, p->tot_len);
 										pbuf_free(p);
@@ -1162,6 +1170,7 @@ void FTP_Accept_thread(void* arg)
 			for ( ; ; )
 			{
 				err = netconn_accept(conn1, &newconn1);
+				tcp_nagle_disabled(conn1);
 				if ( err == ERR_OK )
 				{
 					if (xTaskCreate((pdTASK_CODE)FTP_Command_thread,
